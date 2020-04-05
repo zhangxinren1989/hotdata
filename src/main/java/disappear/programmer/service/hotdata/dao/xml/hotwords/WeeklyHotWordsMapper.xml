@@ -1,0 +1,267 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="disappear.programmer.service.hotdata.dao.mapper.hotwords.WeeklyHotWordsMapper">
+  <resultMap id="BaseResultMap" type="disappear.programmer.service.hotdata.dao.model.hotwords.WeeklyHotWords">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="keyword" jdbcType="VARCHAR" property="keyword" />
+    <result column="news_link" jdbcType="VARCHAR" property="newsLink" />
+    <result column="video_link" jdbcType="VARCHAR" property="videoLink" />
+    <result column="image_link" jdbcType="VARCHAR" property="imageLink" />
+    <result column="link" jdbcType="VARCHAR" property="link" />
+    <result column="src" jdbcType="VARCHAR" property="src" />
+    <result column="keyword_english" jdbcType="VARCHAR" property="keywordEnglish" />
+    <result column="src_name" jdbcType="VARCHAR" property="srcName" />
+    <result column="week_end" jdbcType="DATE" property="weekEnd" />
+    <result column="image" jdbcType="VARCHAR" property="image" />
+    <result column="video" jdbcType="VARCHAR" property="video" />
+    <result column="index" jdbcType="BIGINT" property="index" />
+    <result column="modify_time" jdbcType="TIMESTAMP" property="modifyTime" />
+  </resultMap>
+  <resultMap extends="BaseResultMap" id="ResultMapWithBLOBs" type="disappear.programmer.service.hotdata.dao.model.hotwords.WeeklyHotWords">
+    <result column="description" jdbcType="LONGVARCHAR" property="description" />
+  </resultMap>
+  <sql id="Blob_Column_List">
+    description
+  </sql>
+  <sql id="Base_Column_List">
+    id, keyword, news_link, video_link, image_link, link, src, keyword_english, src_name, 
+    week_end, image, video, `index`, modify_time, <include refid="Blob_Column_List" />
+  </sql>
+
+  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="ResultMapWithBLOBs">
+    select 
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from weekly_hot_words
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <!-- 选择最新实时若干条数据 -->
+  <select id="selectWeeklyHotWords" resultMap="ResultMapWithBLOBs">
+    select 
+    <include refid="Base_Column_List" />
+    from weekly_hot_words
+    where src = #{source,jdbcType=VARCHAR}
+    <if test="weekEnd != null">
+    	<![CDATA[ and week_end >= #{weekEnd,jdbcType=DATE} and week_end < date_add(#{weekEnd,jdbcType=DATE}, interval 1 day) ]]>
+    </if>
+	<if test="weekEnd == null">
+    	<![CDATA[ and week_end >= CURDATE() and week_end < date_add(CURDATE(), interval 1 day) ]]>
+    </if>
+  </select>
+    <!-- 根据keyWord查询记录 -->
+  <select id="selectWeeklyByKeyWord" resultMap="ResultMapWithBLOBs">
+    select 
+    <include refid="Base_Column_List" />
+    from weekly_hot_words
+    where keyword = #{keyWord,jdbcType=VARCHAR}
+    <![CDATA[ and week_end >= #{weekEnd,jdbcType=DATE} and week_end < date_add(#{weekEnd,jdbcType=DATE}, interval 1 day) ]]>
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from weekly_hot_words
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="disappear.programmer.service.hotdata.dao.model.hotwords.WeeklyHotWords">
+    insert into weekly_hot_words (keyword, news_link, 
+      video_link, image_link, link, 
+      src, keyword_english, src_name, 
+      week_end, image, video, 
+      `index`, description)
+    values (#{keyword,jdbcType=VARCHAR}, #{newsLink,jdbcType=VARCHAR}, 
+      #{videoLink,jdbcType=VARCHAR}, #{imageLink,jdbcType=VARCHAR}, #{link,jdbcType=VARCHAR}, 
+      #{src,jdbcType=VARCHAR}, #{keywordEnglish,jdbcType=VARCHAR}, #{srcName,jdbcType=VARCHAR}, 
+      #{weekEnd,jdbcType=DATE}, #{image,jdbcType=VARCHAR}, #{video,jdbcType=VARCHAR}, 
+      #{index,jdbcType=BIGINT}, #{description,jdbcType=LONGVARCHAR})
+  </insert>
+  <!-- 批量插入 -->
+  <insert id="insertBatch" parameterType="disappear.programmer.service.hotdata.dao.model.hotwords.WeeklyHotWords">
+   	insert into
+      weekly_hot_words (keyword, news_link, 
+      video_link, image_link, link, 
+      src, keyword_english, src_name, 
+      week_end, image, video, 
+      `index`, description, modify_time)
+    values 
+	<foreach collection="weeklyHotWords" item="hotWord" separator=","> 
+        (#{hotWord.keyword,jdbcType=VARCHAR}, #{hotWord.newsLink,jdbcType=VARCHAR}, 
+      #{hotWord.videoLink,jdbcType=VARCHAR}, #{hotWord.imageLink,jdbcType=VARCHAR}, #{hotWord.link,jdbcType=VARCHAR}, 
+      #{hotWord.src,jdbcType=VARCHAR}, #{hotWord.keywordEnglish,jdbcType=VARCHAR}, #{hotWord.srcName,jdbcType=VARCHAR}, 
+      #{hotWord.weekEnd,jdbcType=DATE}, #{hotWord.image,jdbcType=VARCHAR}, #{hotWord.video,jdbcType=VARCHAR}, 
+      #{hotWord.index,jdbcType=BIGINT}, #{hotWord.description,jdbcType=LONGVARCHAR},#{hotWord.modifyTime,jdbcType=TIMESTAMP})
+    </foreach> 
+  </insert>
+  <insert id="insertSelective" parameterType="disappear.programmer.service.hotdata.dao.model.hotwords.WeeklyHotWords">
+    insert into weekly_hot_words
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="keyword != null">
+        keyword,
+      </if>
+      <if test="newsLink != null">
+        news_link,
+      </if>
+      <if test="videoLink != null">
+        video_link,
+      </if>
+      <if test="imageLink != null">
+        image_link,
+      </if>
+      <if test="link != null">
+        link,
+      </if>
+      <if test="src != null">
+        src,
+      </if>
+      <if test="keywordEnglish != null">
+        keyword_english,
+      </if>
+      <if test="srcName != null">
+        src_name,
+      </if>
+      <if test="weekEnd != null">
+        week_end,
+      </if>
+      <if test="image != null">
+        image,
+      </if>
+      <if test="video != null">
+        video,
+      </if>
+      <if test="index != null">
+        `index`,
+      </if>
+      <if test="description != null">
+        description,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="keyword != null">
+        #{keyword,jdbcType=VARCHAR},
+      </if>
+      <if test="newsLink != null">
+        #{newsLink,jdbcType=VARCHAR},
+      </if>
+      <if test="videoLink != null">
+        #{videoLink,jdbcType=VARCHAR},
+      </if>
+      <if test="imageLink != null">
+        #{imageLink,jdbcType=VARCHAR},
+      </if>
+      <if test="link != null">
+        #{link,jdbcType=VARCHAR},
+      </if>
+      <if test="src != null">
+        #{src,jdbcType=VARCHAR},
+      </if>
+      <if test="keywordEnglish != null">
+        #{keywordEnglish,jdbcType=VARCHAR},
+      </if>
+      <if test="srcName != null">
+        #{srcName,jdbcType=VARCHAR},
+      </if>
+      <if test="weekEnd != null">
+        #{weekEnd,jdbcType=DATE},
+      </if>
+      <if test="image != null">
+        #{image,jdbcType=VARCHAR},
+      </if>
+      <if test="video != null">
+        #{video,jdbcType=VARCHAR},
+      </if>
+      <if test="index != null">
+        #{index,jdbcType=BIGINT},
+      </if>
+      <if test="description != null">
+        #{description,jdbcType=LONGVARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="disappear.programmer.service.hotdata.dao.model.hotwords.WeeklyHotWords">
+    update weekly_hot_words
+    <set>
+      <if test="keyword != null">
+        keyword = #{keyword,jdbcType=VARCHAR},
+      </if>
+      <if test="newsLink != null">
+        news_link = #{newsLink,jdbcType=VARCHAR},
+      </if>
+      <if test="videoLink != null">
+        video_link = #{videoLink,jdbcType=VARCHAR},
+      </if>
+      <if test="imageLink != null">
+        image_link = #{imageLink,jdbcType=VARCHAR},
+      </if>
+      <if test="link != null">
+        link = #{link,jdbcType=VARCHAR},
+      </if>
+      <if test="src != null">
+        src = #{src,jdbcType=VARCHAR},
+      </if>
+      <if test="keywordEnglish != null">
+        keyword_english = #{keywordEnglish,jdbcType=VARCHAR},
+      </if>
+      <if test="srcName != null">
+        src_name = #{srcName,jdbcType=VARCHAR},
+      </if>
+      <if test="weekEnd != null">
+        week_end = #{weekEnd,jdbcType=DATE},
+      </if>
+      <if test="image != null">
+        image = #{image,jdbcType=VARCHAR},
+      </if>
+      <if test="video != null">
+        video = #{video,jdbcType=VARCHAR},
+      </if>
+      <if test="index != null">
+        `index` = #{index,jdbcType=BIGINT},
+      </if>
+      <if test="description != null">
+        description = #{description,jdbcType=LONGVARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <!-- 批量更新 -->
+	<update id="updateBatch"  parameterType="disappear.programmer.service.hotdata.dao.model.hotwords.WeeklyHotWords">  
+	    <foreach collection="dailyHotWords" item="hotWords" index="index" open="" close="" separator=";">
+	        update weekly_hot_words
+	        <set>
+	            `index`=#{hotWords.index,jdbcType=BIGINT},
+	            modify_time = #{hotWords.modifyTime,jdbcType=TIMESTAMP}
+	        </set>
+	        where id = ${hotWords.id}
+	    </foreach>      
+	</update>
+  <update id="updateByPrimaryKeyWithBLOBs" parameterType="disappear.programmer.service.hotdata.dao.model.hotwords.WeeklyHotWords">
+    update weekly_hot_words
+    set keyword = #{keyword,jdbcType=VARCHAR},
+      news_link = #{newsLink,jdbcType=VARCHAR},
+      video_link = #{videoLink,jdbcType=VARCHAR},
+      image_link = #{imageLink,jdbcType=VARCHAR},
+      link = #{link,jdbcType=VARCHAR},
+      src = #{src,jdbcType=VARCHAR},
+      keyword_english = #{keywordEnglish,jdbcType=VARCHAR},
+      src_name = #{srcName,jdbcType=VARCHAR},
+      week_end = #{weekEnd,jdbcType=DATE},
+      image = #{image,jdbcType=VARCHAR},
+      video = #{video,jdbcType=VARCHAR},
+      `index` = #{index,jdbcType=BIGINT},
+      description = #{description,jdbcType=LONGVARCHAR}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="disappear.programmer.service.hotdata.dao.model.hotwords.WeeklyHotWords">
+    update weekly_hot_words
+    set keyword = #{keyword,jdbcType=VARCHAR},
+      news_link = #{newsLink,jdbcType=VARCHAR},
+      video_link = #{videoLink,jdbcType=VARCHAR},
+      image_link = #{imageLink,jdbcType=VARCHAR},
+      link = #{link,jdbcType=VARCHAR},
+      src = #{src,jdbcType=VARCHAR},
+      keyword_english = #{keywordEnglish,jdbcType=VARCHAR},
+      src_name = #{srcName,jdbcType=VARCHAR},
+      week_end = #{weekEnd,jdbcType=DATE},
+      image = #{image,jdbcType=VARCHAR},
+      video = #{video,jdbcType=VARCHAR},
+      `index` = #{index,jdbcType=BIGINT}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+</mapper>
