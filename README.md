@@ -1,2 +1,2 @@
 # hotdata
-collect hot data from website
+collect hot data from web
